@@ -1,74 +1,69 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-import { FaAngleDoubleRight } from "react-icons/fa";
-const url = "https://course-api.com/react-tabs-project";
+import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
+import { FaQuoteRight } from "react-icons/fa";
+import data from "./data";
 
 function App() {
-  const [loading, setLoading] = useState(true);
-  const [jobs, setJobs] = useState([]);
-  const [value, setValue] = useState(0);
-
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(url);
-      const newJobs = await response.json();
-      setJobs(newJobs);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-    }
-  };
+  const [people, setPeopel] = useState(data);
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
+    const lastIndex = people.length - 1;
+    if (index < 0) {
+      setIndex(lastIndex);
+    }
+    if (index > lastIndex) {
+      setIndex(0);
+    }
+  }, [index, people]);
 
-  if (loading) {
-    return (
-      <section className="section loading">
-        <h1>Loading...</h1>
-      </section>
-    );
-  }
-  const { company, dates, duties, title } = jobs[value];
+  useEffect(() => {
+    let slider = setInterval(() => {
+      setIndex(index - 1);
+    }, 3000);
+    return () => clearInterval(slider);
+  }, [index]);
 
   return (
     <section className="section">
       <div className="title">
-        <h2>expierence</h2>
-        <div className="underline"></div>
+        <h2>
+          <span>/</span>Reviews
+        </h2>
       </div>
-      <div className="jobs-center">
-        {/* btn container  */}
-        <div className="btn-container">
-          {jobs.map((item, index) => {
-            return (
-              <button
-                className={`job-btn ${index === value && "active-btn"}`}
-                onClick={() => setValue(index)}
-                key={item.id}
-              >
-                {item.company}
-              </button>
-            );
-          })}
-        </div>
-        {/* job info */}
-        <article className="job-info">
-          <h3>{title}</h3>
-          <h4>{company}</h4>
-          <p className="job-date">{dates}</p>
-          {duties.map((duty, index) => {
-            return (
-              <div className="job-desc" key={index}>
-                <FaAngleDoubleRight className="job-icon"></FaAngleDoubleRight>
-                <p>{duty}</p>
-              </div>
-            );
-          })}
-        </article>
+      <div className="section-center">
+        {people.map((person, personIndex) => {
+          const { id, image, title, name, quote } = person;
+          //more stuff coming up
+          let position = "nextSlide";
+
+          if (personIndex === index) {
+            position = "activeSlide";
+          }
+          if (
+            personIndex === index - 1 ||
+            (index === 0 && personIndex === people.length - 1)
+          ) {
+            position = "lastSlide";
+          }
+
+          return (
+            <article className={position} key={id}>
+              <img src={image} alt={name} className="person-img" />
+              <h4>{name}</h4>
+              <p className="title">{title}</p>
+              <p className="text">{quote}</p>
+              <FaQuoteRight className="icon" />
+            </article>
+          );
+        })}
+        <button onClick={() => setIndex(index - 1)} className="prev">
+          <FiChevronLeft />
+        </button>
+        <button onClick={() => setIndex(index + 1)} className="next">
+          <FiChevronRight />
+        </button>
       </div>
     </section>
   );
